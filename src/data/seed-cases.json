@@ -1,0 +1,63 @@
+[
+  {
+    "id": "case_ui_001",
+    "title": "Accessible Toggle Switch",
+    "dimension": "ui",
+    "prompt": "Implement a React + Tailwind toggle switch component. Requirements:\n- Controlled component (`checked`, `onChange`)\n- Fully keyboard accessible (Space/Enter to toggle, Tab to focus)\n- aria-checked and proper role\n- Smooth thumb transition\n- Disabled state with reduced opacity",
+    "expected": "A function component using button[role=switch] with aria-checked, focus ring, transition classes, and disabled handling.",
+    "outputSchema": "code",
+    "constraints": {
+      "mustContain": ["role=", "aria-checked"],
+      "mustNotContain": ["dangerouslySetInnerHTML"]
+    },
+    "tags": ["react", "a11y", "tailwind"]
+  },
+  {
+    "id": "case_bug_001",
+    "title": "Stale Closure in useEffect",
+    "dimension": "bug",
+    "prompt": "The following React hook is supposed to log the latest `count` every second, but it always logs 0. Identify the root cause and provide a fix.\n\n```tsx\nfunction useTicker(count: number) {\n  useEffect(() => {\n    const id = setInterval(() => console.log(count), 1000);\n    return () => clearInterval(id);\n  }, []);\n}\n```",
+    "expected": "Stale closure: the effect captures `count` at mount. Fix by including `count` in deps, or using a ref, or functional setState pattern.",
+    "outputSchema": "text",
+    "constraints": {
+      "mustContain": ["stale", "closure"]
+    },
+    "tags": ["react", "hooks"]
+  },
+  {
+    "id": "case_feature_001",
+    "title": "Debounced Async Search Hook",
+    "dimension": "feature",
+    "prompt": "Implement a TypeScript hook `useAsyncSearch<T>(fn: (q: string) => Promise<T[]>, delay = 300)` that:\n- Debounces input by `delay` ms\n- Cancels in-flight requests when input changes\n- Returns `{ query, setQuery, results, loading, error }`\n- Handles unmount safely (no setState after unmount)",
+    "expected": "Hook using AbortController + setTimeout cleanup + isMounted ref pattern.",
+    "outputSchema": "code",
+    "constraints": {
+      "mustContain": ["AbortController", "useEffect"]
+    },
+    "tags": ["react", "async", "typescript"]
+  },
+  {
+    "id": "case_doc_001",
+    "title": "API Reference: rate-limit middleware",
+    "dimension": "doc",
+    "prompt": "Write API reference documentation for a Node.js middleware `rateLimit({ windowMs, max, keyGenerator? })`. Include: overview, signature, parameter table, behavior on limit exceeded (HTTP 429 + Retry-After), and a usage example with Express.",
+    "expected": "Sections: Overview, Signature, Parameters table, Response, Example.",
+    "outputSchema": "text",
+    "constraints": {
+      "mustContain": ["windowMs", "429", "Retry-After"]
+    },
+    "tags": ["docs", "node", "api"]
+  },
+  {
+    "id": "case_security_001",
+    "title": "Prompt Injection in a RAG endpoint",
+    "dimension": "security",
+    "prompt": "Review this Express route. Identify any prompt-injection or data-exfiltration risks and recommend mitigations.\n\n```ts\napp.post('/chat', async (req, res) => {\n  const { question } = req.body;\n  const docs = await retrieve(question);\n  const prompt = `Use the docs below to answer the user.\\nDocs: ${docs}\\nQuestion: ${question}`;\n  const answer = await llm(prompt);\n  res.json({ answer });\n});\n```",
+    "expected": "Identifies: untrusted question concatenated into system context; untrusted docs may contain injected instructions; no input length cap; no output filtering. Mitigations: structured messages, instruction hierarchy, content filtering, output validation.",
+    "outputSchema": "text",
+    "constraints": {
+      "mustContain": ["injection"]
+    },
+    "tags": ["security", "rag", "llm"]
+  }
+]

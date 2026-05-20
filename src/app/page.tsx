@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { listCases, listRuns } from '@/lib/store';
 import { availableProviders } from '@/lib/providers';
 import { RunButton } from '@/components/RunButton';
+import { formatUtcDateTime } from '@/lib/format';
 
 export default async function HomePage() {
   const cases = listCases();
@@ -70,7 +71,7 @@ export default async function HomePage() {
                 >
                   <span className="text-sm">{r.caseSnapshot.title}</span>
                   <span className="text-xs text-muted">
-                    {r.results.length} models · {new Date(r.startedAt).toLocaleString()}
+                    {r.results.length} models · {formatUtcDateTime(r.startedAt)}
                   </span>
                 </Link>
               </li>

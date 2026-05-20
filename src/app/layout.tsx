@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <nav className="text-sm text-muted">
               <a
-                href="https://github.com/"
+                href="https://github.com/yuebanyin/evallens"
                 className="hover:text-fg"
                 target="_blank"
                 rel="noreferrer"
@@ -35,7 +35,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="relative mx-auto max-w-6xl px-6 py-10">{children}</main>
         <footer className="mt-20 border-t border-border py-6 text-center text-xs text-muted">
-          Built with ❤️ by an ex-Microsoft CoreAI eval engineer · MIT
+          <span>
+            Built with <span aria-hidden>❤️</span> by{' '}
+            <a
+              href="https://github.com/yuebanyin"
+              target="_blank"
+              rel="noreferrer"
+              className="text-fg hover:text-accent"
+            >
+              @yuebanyin
+            </a>
+            {' · '}
+            <a
+              href="https://github.com/yuebanyin/evallens"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-fg"
+            >
+              Source on GitHub
+            </a>
+            {' · MIT License'}
+          </span>
         </footer>
       </body>
     </html>

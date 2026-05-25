@@ -1,11 +1,11 @@
 import type { Case, RubricDimension } from './types';
 
 /**
- * 5-Dimension Rubric Templates
+ * 五维 Rubric 评分模板。
  *
- * Distilled from the evaluation matrix used internally at Microsoft CoreAI
- * Post-Training, generalized so non-ML users can pick the right preset for
- * their task without designing rubrics from scratch.
+ * 不想让用户每次都自己从零设计打分维度，所以按任务类型预置了几套常见的
+ * 评估维度（UI / Bug / Feature / 文档 / 安全）。维度本身参考了模型评测里
+ * 比较通用的几个轴，再按各类型实际关心什么做的取舍。
  */
 export const RUBRIC_DIMENSIONS: Record<Case['dimension'], RubricDimension[]> = {
   ui: [
@@ -49,9 +49,11 @@ export const RUBRIC_DIMENSIONS: Record<Case['dimension'], RubricDimension[]> = {
 };
 
 /**
- * Heuristic auto-scoring (0..5) used in the MVP. It is intentionally
- * lightweight — meant to give immediate feedback and a radar chart out of
- * the box. Real production use should pair this with LLM-as-judge.
+ * 启发式打分 (0..5)。
+ *
+ * MVP 阶段用的占位实现，只看长度、关键词重合、约束违规这几个粗信号，
+ * 主要是为了让雷达图先有东西可画。真要当评估结果用，得换成 LLM-as-judge
+ * （在 Roadmap 里）。
  */
 export function heuristicScore(c: Case, output: string): Record<string, number> {
   const dims = RUBRIC_DIMENSIONS[c.dimension];

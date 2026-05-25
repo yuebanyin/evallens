@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { listCases, listRuns } from '@/lib/store';
 import { availableProviders } from '@/lib/providers';
-import { RunButton } from '@/components/RunButton';
+import { RunPanel } from '@/components/RunPanel';
 import { formatUtcDateTime } from '@/lib/format';
 
 export default async function HomePage() {
@@ -9,6 +9,13 @@ export default async function HomePage() {
   const providers = availableProviders();
   const recentRuns = (await listRuns()).slice(0, 5);
   const hasRealKeys = providers.some((p) => p.id !== 'mock');
+
+  // Default selection: prefer real providers when keys are configured,
+  // otherwise default to a single mock so the demo "just works".
+  const defaultSelected = (hasRealKeys
+    ? providers.filter((p) => p.id !== 'mock')
+    : providers.filter((p) => p.model === 'mock-fast')
+  ).map((p) => `${p.id}/${p.model}`);
 
   return (
     <div className="space-y-12">
@@ -31,7 +38,7 @@ export default async function HomePage() {
 
       {/* Cases */}
       <section>
-        <SectionTitle title="Seed cases" hint="Pick one and hit Run" />
+        <SectionTitle title="Seed cases" hint="Pick models, then hit Run" />
         <div className="grid gap-4 md:grid-cols-2">
           {cases.map((c) => (
             <article
@@ -50,9 +57,13 @@ export default async function HomePage() {
                     ))}
                   </div>
                 </div>
-                <RunButton caseId={c.id} />
               </div>
               <p className="mt-3 line-clamp-3 text-sm text-muted">{c.prompt}</p>
+              <RunPanel
+                caseId={c.id}
+                providers={providers}
+                defaultSelected={defaultSelected}
+              />
             </article>
           ))}
         </div>

@@ -1,16 +1,15 @@
 import type { Case, ModelResult } from './types';
 
 /**
- * Sanity Check — the "test the test" gate.
+ * Sanity Check —— 评分前的两道门。
  *
- * In industrial benchmark pipelines, a model's output is meaningless if the
- * case itself is malformed or the output trivially violates structural
- * constraints. This module performs cheap, deterministic checks BEFORE we
- * let an LLM judge or a human reviewer spend cycles on the result.
+ * 真人做评测最容易踩的坑是：case 自己就有问题，或者模型输出明显不对劲（空、
+ * 格式错、违反约束），然后还拿这种结果去打分，最后报告全是噪声。
  *
- * Two layers:
- *   1. Case-level checks  — is the case authored correctly?
- *   2. Output-level checks — does the model output satisfy declared constraints?
+ * 所以这里做两层廉价的、确定性的检查，跑在任何 LLM-as-judge 或人工 review
+ * 之前：
+ *   1. checkCase   —— case 本身写得对不对（Build 门）
+ *   2. checkOutput —— 模型输出有没有违反 case 声明的约束（Sanity 门）
  */
 
 export interface SanityVerdict {
@@ -18,7 +17,7 @@ export interface SanityVerdict {
   reasons: string[];
 }
 
-/** Validate the case definition itself (Build gate). */
+/** Build 门：检查 case 本身是否可用。 */
 export function checkCase(c: Case): SanityVerdict {
   const reasons: string[] = [];
   if (!c.prompt.trim()) reasons.push('Prompt is empty.');
@@ -29,7 +28,7 @@ export function checkCase(c: Case): SanityVerdict {
   return { passed: reasons.length === 0, reasons };
 }
 
-/** Validate a single model output against the case constraints (Sanity gate). */
+/** Sanity 门：检查模型输出有没有违反 case 声明的约束。 */
 export function checkOutput(c: Case, output: string): SanityVerdict {
   const reasons: string[] = [];
   const text = output ?? '';
@@ -72,7 +71,7 @@ function stripCodeFence(s: string): string {
   return m ? m[1] : s;
 }
 
-/** Convenience: annotate a ModelResult in place. */
+/** 给一个还没跟 sanity 结论的 ModelResult 加上 sanity 字段。 */
 export function annotateSanity(c: Case, r: Omit<ModelResult, 'sanity'>): ModelResult {
   return { ...r, sanity: checkOutput(c, r.output) };
 }

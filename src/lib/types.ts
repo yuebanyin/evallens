@@ -1,16 +1,21 @@
 import { z } from 'zod';
 
-/** A single evaluation case authored by the user. */
+/**
+ * 整个项目的核心数据模型都在这里。
+ * 用 Zod 是为了后续用户自定义 case / API 接入时能拿到一道免费的运行时校验。
+ */
+
+/** 一条评测用例。 */
 export const CaseSchema = z.object({
   id: z.string(),
   title: z.string(),
   dimension: z.enum(['ui', 'bug', 'feature', 'doc', 'security', 'custom']),
   prompt: z.string().min(1),
-  /** Free-form expected output / acceptance notes. Used by Sanity Check & judge. */
+  /** 参考答案 / 验收说明，供 sanity check 和后续 LLM judge 参考。 */
   expected: z.string().optional(),
-  /** Optional schema the output must satisfy (used in Sanity Check). */
+  /** 结果期望的输出形式。 */
   outputSchema: z.enum(['text', 'json', 'code']).default('text'),
-  /** Soft constraints — max chars / must-contain tokens etc. */
+  /** 软约束：最大长度、必须包含的关键字等。 */
   constraints: z
     .object({
       maxChars: z.number().int().positive().optional(),
@@ -23,11 +28,11 @@ export const CaseSchema = z.object({
 });
 export type Case = z.infer<typeof CaseSchema>;
 
-/** Provider identifiers supported by the runner. */
+/** 目前支持的 provider 底座。 */
 export const ProviderIdSchema = z.enum(['openai', 'anthropic', 'mock']);
 export type ProviderId = z.infer<typeof ProviderIdSchema>;
 
-/** One model invocation result. */
+/** 一次模型调用的结果。 */
 export const ModelResultSchema = z.object({
   provider: ProviderIdSchema,
   model: z.string(),
@@ -37,17 +42,16 @@ export const ModelResultSchema = z.object({
   outputTokens: z.number().optional(),
   costUsd: z.number().optional(),
   error: z.string().optional(),
-  /** Sanity-check verdict for this output. */
   sanity: z.object({
     passed: z.boolean(),
     reasons: z.array(z.string()),
   }),
-  /** Rubric scores 0..5 per dimension. */
+  /** rubric 打分，每个维度 0..5。 */
   scores: z.record(z.number()).optional(),
 });
 export type ModelResult = z.infer<typeof ModelResultSchema>;
 
-/** A full run = one case × N models. */
+/** 一次完整的 run：一个 case × N 个模型。 */
 export const RunSchema = z.object({
   id: z.string(),
   caseId: z.string(),
@@ -58,7 +62,6 @@ export const RunSchema = z.object({
 });
 export type Run = z.infer<typeof RunSchema>;
 
-/** Rubric dimension definition. */
 export interface RubricDimension {
   key: string;
   label: string;

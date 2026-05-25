@@ -3,9 +3,8 @@ import { annotateSanity } from '../sanity-check';
 import { heuristicScore } from '../rubric';
 
 /**
- * A deterministic mock provider. Used when no API keys are configured so the
- * product can be demoed end-to-end. Different model ids produce different
- * "personalities" so the compare view still looks meaningful.
+ * Mock provider。没配 API key 也能把整个流程跑通用的，主要服务于 demo 和本地开发。
+ * model id 不同会走不同的文本模板（fast / careful），让对比页看起来不是三列一样的。
  */
 export async function runMock(c: Case, model: string): Promise<ModelResult> {
   const started = Date.now();

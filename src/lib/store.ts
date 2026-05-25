@@ -5,9 +5,11 @@ import type { Case, Run } from './types';
 import seedCases from '@/data/seed-cases.json';
 
 /**
- * Minimal local-first persistence. Runs are written to `.evallens/runs/<id>.json`
- * under the project root so users can grep / share / version them easily.
- * No database, no migration — true Local-first.
+ * 本地持久化：每个 run 写成一个 JSON 文件，放在项目根目录的
+ * `.evallens/runs/<id>.json`。
+ *
+ * 选 JSON 而不是数据库，是因为评测工具最关键的是"我的数据我自己掌握"——
+ * 用户可以直接 grep、diff、丢进 git，不用为一个本地小工具装 Postgres。
  */
 
 const ROOT = path.join(process.cwd(), '.evallens');

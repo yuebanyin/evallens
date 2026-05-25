@@ -1,0 +1,108 @@
+# TODO / Progress
+
+记录这个项目目前推进到哪一步、为什么这么排。  
+不放在 README 里，是因为 README 是给"外部访客"看的，这份是给"我自己和未来贡献者"看的。
+
+---
+
+## 现在进行到哪
+
+**Step 2：自定义 Case 表单** — in progress 🟡
+
+上一步刚做完模型选择 UI 和一轮 human-pass（注释口语化 + README 重写）。  
+下一步要让用户能直接在 UI 里写自己的任务，而不是只能用 `seed-cases.json` 里那几条。
+
+---
+
+## 路线图
+
+按"性价比"排的整体计划。每一步做完会把对应 commit 链接补上来。
+
+### ✅ Step 0：基础能力（已经在 MVP 里）
+
+- [x] 多 Provider 并发跑（OpenAI / Anthropic / Mock）
+- [x] 五维 Rubric 打分（heuristic 占位）
+- [x] Sanity Check 双门（Build + Output）
+- [x] 并排对比 + 雷达图
+- [x] 本地 JSON 持久化
+
+### ✅ Step 1：模型选择 UI
+
+让用户能为每个 case 单独勾选要跑的模型，而不是默认把所有 provider 全跑。
+
+- [x] 新增 `RunPanel` 组件，pill 形式的模型勾选
+- [x] 删除老的 `RunButton`
+- [x] 默认勾上有 key 的 provider，没 key 时默认勾 `mock-fast`
+- [x] 后端零改动（Zod schema 原本就留了 `providers` 字段）
+
+### ✅ Human-pass：去 AI 味
+
+不是新功能，但对求职/开源观感很关键。
+
+- [x] 清掉 `industrial-grade` / `first-class citizen` / `true Local-first` 等营销词
+- [x] 文件头注释从"哲学化宣言"改成"踩过的坑 + 设计动机"
+- [x] 函数级 JSDoc 从英文翻译式改成口语化中文
+- [x] README 砍掉过度 emoji、大 ASCII 图、工整表格，第一人称口语化
+- [x] 修复 hydration mismatch（`toLocaleString` + Recharts SSR）
+- [x] 修复 tsconfig 的 `ignoreDeprecations` 错误
+- [x] Footer 换成个人署名
+
+### 🟡 Step 2：自定义 Case 表单（in progress）
+
+让产品真正贴合"评测**你自己**的任务"这个卖点。
+
+- [ ] 首页加一个"+ 新建 Case"按钮 → 打开表单 / 弹层
+- [ ] 表单字段：title / dimension / prompt / expected（可选）/ outputSchema / 约束（可选）
+- [ ] 用现成的 Zod schema 做校验（前端 + API 各一道）
+- [ ] 提交时新增到本地存储 → 出现在 case 列表里
+- [ ] 思考：用户自定义的 case 怎么存？放 `.evallens/cases/<id>.json`，跟 runs 并列
+- [ ] （可能需要）把 `listCases()` 改成同时读 seed 和用户 case
+
+### Step 3：LLM-as-Judge 打分
+
+把雷达图从"装饰"升级到"硬通货"。
+
+- [ ] 新增 `judge.ts`：用一个模型给另一个模型的输出打分（按 rubric 维度逐项）
+- [ ] Judge 提示词模板设计（参考 G-Eval / MT-Bench 的做法）
+- [ ] 在 `route.ts` 里加一个 `judge` 阶段，可配开关
+- [ ] UI 上标记"分数来源"：heuristic / GPT-4o-judge / human override
+- [ ] 思考：要不要支持 ensemble judge（多个模型投票）？先做单 judge
+
+### Step 4：HTML / Markdown 报告导出
+
+让评测结果能"带走"，发给非技术同事。
+
+- [ ] 详情页加 "Export" 按钮
+- [ ] Markdown：纯文本，方便贴到 Slack / PR
+- [ ] HTML：自包含的单文件，雷达图变内嵌 SVG
+- [ ] 思考：要不要支持 PDF？应该不用，HTML 打印就行
+
+### Step 5：Vercel 部署 + Demo 链接
+
+让访客 3 秒钟体验产品。
+
+- [ ] 部署到 Vercel
+- [ ] README 顶部加 "Try it live" 按钮
+- [ ] 注意：线上版必须强制 mock 模式（不能把生产 API key 暴露）
+- [ ] 思考：是否提供"BYOK"（用户填自己的 key，存在浏览器 localStorage）？可能 Step 5.5
+
+### Step 6：GitHub Actions CI
+
+社区门面，让别人提 PR 有反馈。
+
+- [ ] `.github/workflows/ci.yml`：跑 `npm run typecheck` + `npm run lint`
+- [ ] Push / PR 都触发
+- [ ] README 加 CI 徽章
+
+---
+
+## 想法池（暂不排期）
+
+随手记的、还没想清楚的：
+
+- 跨 run 对比（同一个 case 在不同时间 / 模型上的演化趋势）
+- 接入公开数据集（SWE-bench Lite、HumanEval）
+- 插件 SDK（让用户自己写 Provider 适配器）
+- RAG 评测模块（检索召回 + 回答质量分开打分）
+- "Human override" 模式：用户能手动改打分，并附理由
+- Cost 累计 dashboard（每次 run 估算花了多少钱）

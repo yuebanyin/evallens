@@ -51,12 +51,14 @@
 
 让产品真正贴合"评测**你自己**的任务"这个卖点。
 
-- [ ] 首页加一个"+ 新建 Case"按钮 → 打开表单 / 弹层
-- [ ] 表单字段：title / dimension / prompt / expected（可选）/ outputSchema / 约束（可选）
-- [ ] 用现成的 Zod schema 做校验（前端 + API 各一道）
-- [ ] 提交时新增到本地存储 → 出现在 case 列表里
-- [ ] 思考：用户自定义的 case 怎么存？放 `.evallens/cases/<id>.json`，跟 runs 并列
-- [ ] （可能需要）把 `listCases()` 改成同时读 seed 和用户 case
+- [x] 首页加一个"+ 新建 Case"按钮 → 打开表单 / 弹层
+- [x] 表单字段：title / dimension / prompt / expected（可选）/ outputSchema / 约束（可选）
+- [x] 用现成的 Zod schema 做校验（前端 + API 各一道）
+- [x] 提交时新增到本地存储 → 出现在 case 列表里
+- [x] 用户自定义 case 存在 `.evallens/cases/<id>.json`（与 runs 并列）
+- [x] `listCases()` 同时读 seed + 用户 case
+- [x] 首页分组显示 Built-in / Custom
+- [x] 支持 Custom case 的 Edit / Delete
 
 ### Step 3：LLM-as-Judge 打分
 

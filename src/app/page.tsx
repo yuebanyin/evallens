@@ -2,10 +2,16 @@ import Link from 'next/link';
 import { listCases, listRuns } from '@/lib/store';
 import { availableProviders } from '@/lib/providers';
 import { RunPanel } from '@/components/RunPanel';
+import { CreateCaseDialog } from '@/components/CreateCaseDialog';
+import { CustomCaseActions } from '@/components/CustomCaseActions';
 import { formatUtcDateTime } from '@/lib/format';
+import type { Case } from '@/lib/types';
+import type { ProviderOption } from '@/components/RunPanel';
 
 export default async function HomePage() {
   const cases = listCases();
+  const builtInCases = cases.filter((c) => !isCustomCase(c));
+  const customCases = cases.filter((c) => isCustomCase(c));
   const providers = availableProviders();
   const recentRuns = (await listRuns()).slice(0, 5);
   const hasRealKeys = providers.some((p) => p.id !== 'mock');
@@ -38,35 +44,39 @@ export default async function HomePage() {
 
       {/* Cases */}
       <section>
-        <SectionTitle title="Seed cases" hint="Pick models, then hit Run" />
-        <div className="grid gap-4 md:grid-cols-2">
-          {cases.map((c) => (
-            <article
-              key={c.id}
-              className="rounded-xl border border-border bg-panel p-5 transition hover:border-accent/60"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <h3 className="font-medium">{c.title}</h3>
-                  <div className="flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wider text-muted">
-                    <span className="rounded bg-bg px-1.5 py-0.5">{c.dimension}</span>
-                    {c.tags.slice(0, 3).map((t) => (
-                      <span key={t} className="rounded bg-bg px-1.5 py-0.5">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 line-clamp-3 text-sm text-muted">{c.prompt}</p>
-              <RunPanel
-                caseId={c.id}
-                providers={providers}
-                defaultSelected={defaultSelected}
-              />
-            </article>
-          ))}
-        </div>
+        <SectionTitle title="Cases" hint="Pick models, then hit Run" right={<CreateCaseDialog />} />
+        {builtInCases.length > 0 && (
+          <div className="space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted">Built-in</div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {builtInCases.map((c) => (
+                <CaseCard
+                  key={c.id}
+                  c={c}
+                  providers={providers}
+                  defaultSelected={defaultSelected}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {customCases.length > 0 && (
+          <div className="mt-6 space-y-3">
+            <div className="text-xs uppercase tracking-wider text-muted">Custom</div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {customCases.map((c) => (
+                <CaseCard
+                  key={c.id}
+                  c={c}
+                  providers={providers}
+                  defaultSelected={defaultSelected}
+                  actions={<CustomCaseActions c={c} />}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Recent runs */}
@@ -94,11 +104,22 @@ export default async function HomePage() {
   );
 }
 
-function SectionTitle({ title, hint }: { title: string; hint?: string }) {
+function SectionTitle({
+  title,
+  hint,
+  right,
+}: {
+  title: string;
+  hint?: string;
+  right?: React.ReactNode;
+}) {
   return (
     <div className="mb-4 flex items-end justify-between">
-      <h2 className="text-lg font-semibold">{title}</h2>
-      {hint && <span className="text-xs text-muted">{hint}</span>}
+      <div>
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {hint && <span className="text-xs text-muted">{hint}</span>}
+      </div>
+      {right}
     </div>
   );
 }
@@ -119,4 +140,45 @@ function Badge({
   return (
     <span className={`rounded-full border px-2.5 py-1 ${palette}`}>{children}</span>
   );
+}
+
+function CaseCard({
+  c,
+  providers,
+  defaultSelected,
+  actions,
+}: {
+  c: Case;
+  providers: ProviderOption[];
+  defaultSelected: string[];
+  actions?: React.ReactNode;
+}) {
+  return (
+    <article className="rounded-xl border border-border bg-panel p-5 transition hover:border-accent/60">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h3 className="font-medium">{c.title}</h3>
+          <div className="flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wider text-muted">
+            <span className="rounded bg-bg px-1.5 py-0.5">{c.dimension}</span>
+            {c.tags.slice(0, 3).map((t) => (
+              <span key={t} className="rounded bg-bg px-1.5 py-0.5">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+        {actions}
+      </div>
+      <p className="mt-3 line-clamp-3 text-sm text-muted">{c.prompt}</p>
+      <RunPanel
+        caseId={c.id}
+        providers={providers}
+        defaultSelected={defaultSelected}
+      />
+    </article>
+  );
+}
+
+function isCustomCase(c: Case) {
+  return c.id.startsWith('case_custom_') || c.tags.includes('user');
 }

@@ -7,10 +7,11 @@
 
 ## 现在进行到哪
 
-**Step 2：自定义 Case 表单** — in progress 🟡
+**Step 2：自定义 Case 表单（主线）** — done ✅
 
 上一步刚做完模型选择 UI 和一轮 human-pass（注释口语化 + README 重写）。  
-下一步要让用户能直接在 UI 里写自己的任务，而不是只能用 `seed-cases.json` 里那几条。
+目前已支持：创建 / 编辑 / 删除自定义 case，本地持久化到 `.evallens/cases`，并在首页按 Built-in / Custom 分组展示。  
+下一步进入 **Step 3：LLM-as-Judge 打分**。
 
 ---
 
@@ -47,7 +48,7 @@
 - [x] 修复 tsconfig 的 `ignoreDeprecations` 错误
 - [x] Footer 换成个人署名
 
-### 🟡 Step 2：自定义 Case 表单（in progress）
+### ✅ Step 2：自定义 Case 表单（主线已完成）
 
 让产品真正贴合"评测**你自己**的任务"这个卖点。
 
@@ -59,6 +60,7 @@
 - [x] `listCases()` 同时读 seed + 用户 case
 - [x] 首页分组显示 Built-in / Custom
 - [x] 支持 Custom case 的 Edit / Delete
+- [ ] 收尾优化（可选）：操作反馈 toast / 二次确认文案 / 列表筛选
 
 ### Step 3：LLM-as-Judge 打分
 

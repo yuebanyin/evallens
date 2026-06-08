@@ -32,6 +32,10 @@ export type Case = z.infer<typeof CaseSchema>;
 export const ProviderIdSchema = z.enum(['openai', 'anthropic', 'mock']);
 export type ProviderId = z.infer<typeof ProviderIdSchema>;
 
+/** 分数的来源：heuristic（占位） / llm-judge（一个模型给另一个模型打分） / human（人工 override）。 */
+export const ScoreSourceSchema = z.enum(['heuristic', 'llm-judge', 'human']);
+export type ScoreSource = z.infer<typeof ScoreSourceSchema>;
+
 /** 一次模型调用的结果。 */
 export const ModelResultSchema = z.object({
   provider: ProviderIdSchema,
@@ -48,6 +52,12 @@ export const ModelResultSchema = z.object({
   }),
   /** rubric 打分，每个维度 0..5。 */
   scores: z.record(z.number()).optional(),
+  /** 分数来源；未设置时按 heuristic 处理。 */
+  scoreSource: ScoreSourceSchema.optional(),
+  /** LLM judge 模型 id（仅 scoreSource = llm-judge 时填）。 */
+  judgeModel: z.string().optional(),
+  /** LLM judge 给出的简短理由，便于人工 cross-check。 */
+  judgeNotes: z.string().optional(),
 });
 export type ModelResult = z.infer<typeof ModelResultSchema>;
 

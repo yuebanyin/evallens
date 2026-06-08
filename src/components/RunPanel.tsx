@@ -14,16 +14,19 @@ interface Props {
   providers: ProviderOption[];
   /** 默认勾上的项，格式是 "id/model"，例如 "openai/gpt-4o"。 */
   defaultSelected: string[];
+  /** 后端是否配了 LLM judge（有 OpenAI / Anthropic key）。没配就把开关禁用，避免误以为开了就生效。 */
+  judgeAvailable: boolean;
 }
 
 function providerKey(p: ProviderOption) {
   return `${p.id}/${p.model}`;
 }
 
-export function RunPanel({ caseId, providers, defaultSelected }: Props) {
+export function RunPanel({ caseId, providers, defaultSelected, judgeAvailable }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set(defaultSelected));
   const [loading, setLoading] = useState(false);
+  const [useJudge, setUseJudge] = useState(judgeAvailable);
 
   function toggle(key: string) {
     setSelected((prev) => {
@@ -45,7 +48,11 @@ export function RunPanel({ caseId, providers, defaultSelected }: Props) {
       const res = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caseId, providers: chosen }),
+        body: JSON.stringify({
+          caseId,
+          providers: chosen,
+          judge: judgeAvailable ? useJudge : false,
+        }),
       });
       if (!res.ok) {
         const t = await res.text();
@@ -83,6 +90,29 @@ export function RunPanel({ caseId, providers, defaultSelected }: Props) {
           </button>
         );
       })}
+      <label
+        className={`ml-2 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition ${
+          judgeAvailable
+            ? useJudge
+              ? 'border-accent/60 bg-accent/15 text-accent'
+              : 'border-border bg-bg text-muted hover:text-fg cursor-pointer'
+            : 'border-border bg-bg text-muted opacity-60'
+        }`}
+        title={
+          judgeAvailable
+            ? 'Use an LLM to score outputs by rubric (slower, costs tokens).'
+            : 'No OpenAI/Anthropic key configured — running heuristic scoring only.'
+        }
+      >
+        <input
+          type="checkbox"
+          className="h-3 w-3 accent-current"
+          checked={judgeAvailable && useJudge}
+          disabled={!judgeAvailable || loading}
+          onChange={(e) => setUseJudge(e.target.checked)}
+        />
+        LLM judge
+      </label>
       <div className="ml-auto">
         <button
           type="button"

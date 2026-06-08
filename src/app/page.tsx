@@ -5,6 +5,7 @@ import { RunPanel } from '@/components/RunPanel';
 import { CreateCaseDialog } from '@/components/CreateCaseDialog';
 import { CustomCaseActions } from '@/components/CustomCaseActions';
 import { formatUtcDateTime } from '@/lib/format';
+import { defaultJudge } from '@/lib/judge';
 import type { Case } from '@/lib/types';
 import type { ProviderOption } from '@/components/RunPanel';
 
@@ -15,6 +16,8 @@ export default async function HomePage() {
   const providers = availableProviders();
   const recentRuns = (await listRuns()).slice(0, 5);
   const hasRealKeys = providers.some((p) => p.id !== 'mock');
+  const judge = defaultJudge();
+  const judgeAvailable = judge !== null;
 
   // Default selection: prefer real providers when keys are configured,
   // otherwise default to a single mock so the demo "just works".
@@ -38,6 +41,11 @@ export default async function HomePage() {
           <Badge tone="ok">Sanity-check gate ✓</Badge>
           <Badge tone="accent">5-Dim Rubric</Badge>
           <Badge>{providers.length} providers ready</Badge>
+          {judgeAvailable ? (
+            <Badge tone="accent">LLM judge: {judge!.model}</Badge>
+          ) : (
+            <Badge>Heuristic scoring</Badge>
+          )}
           {!hasRealKeys && <Badge tone="warn">Mock mode (no API keys)</Badge>}
         </div>
       </section>
@@ -55,6 +63,7 @@ export default async function HomePage() {
                   c={c}
                   providers={providers}
                   defaultSelected={defaultSelected}
+                  judgeAvailable={judgeAvailable}
                 />
               ))}
             </div>
@@ -71,6 +80,7 @@ export default async function HomePage() {
                   c={c}
                   providers={providers}
                   defaultSelected={defaultSelected}
+                  judgeAvailable={judgeAvailable}
                   actions={<CustomCaseActions c={c} />}
                 />
               ))}
@@ -146,11 +156,13 @@ function CaseCard({
   c,
   providers,
   defaultSelected,
+  judgeAvailable,
   actions,
 }: {
   c: Case;
   providers: ProviderOption[];
   defaultSelected: string[];
+  judgeAvailable: boolean;
   actions?: React.ReactNode;
 }) {
   return (
@@ -174,6 +186,7 @@ function CaseCard({
         caseId={c.id}
         providers={providers}
         defaultSelected={defaultSelected}
+        judgeAvailable={judgeAvailable}
       />
     </article>
   );

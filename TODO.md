@@ -7,11 +7,11 @@
 
 ## 现在进行到哪
 
-**Step 2：自定义 Case 表单（主线）** — done ✅
+**Step 3：LLM-as-Judge 打分（主线）** — done ✅
 
-上一步刚做完模型选择 UI 和一轮 human-pass（注释口语化 + README 重写）。  
-目前已支持：创建 / 编辑 / 删除自定义 case，本地持久化到 `.evallens/cases`，并在首页按 Built-in / Custom 分组展示。  
-下一步进入 **Step 3：LLM-as-Judge 打分**。
+上一步刚做完 Step 2（自定义 case CRUD + Built-in/Custom 分组）。  
+现在 run 里加了一个可开关的 LLM judge 阶段：有 OpenAI / Anthropic key 时默认开启，按 rubric 给每个维度打分并输出一句 notes；UI 在详情页用 badge 区分 heuristic / llm-judge / human。  
+下一步进入 **Step 4：HTML / Markdown 报告导出**，或者回头处理 Step 2 的可选收尾优化。
 
 ---
 
@@ -62,15 +62,17 @@
 - [x] 支持 Custom case 的 Edit / Delete
 - [ ] 收尾优化（可选）：操作反馈 toast / 二次确认文案 / 列表筛选
 
-### Step 3：LLM-as-Judge 打分
+### ✅ Step 3：LLM-as-Judge 打分
 
 把雷达图从"装饰"升级到"硬通货"。
 
-- [ ] 新增 `judge.ts`：用一个模型给另一个模型的输出打分（按 rubric 维度逐项）
-- [ ] Judge 提示词模板设计（参考 G-Eval / MT-Bench 的做法）
-- [ ] 在 `route.ts` 里加一个 `judge` 阶段，可配开关
-- [ ] UI 上标记"分数来源"：heuristic / GPT-4o-judge / human override
-- [ ] 思考：要不要支持 ensemble judge（多个模型投票）？先做单 judge
+- [x] 新增 `judge.ts`：用一个模型给另一个模型的输出打分（按 rubric 维度逐项）
+- [x] Judge 提示词模板设计（JSON-only、强制 0..5 整数、带一句 notes）
+- [x] 在 `route.ts` 里加了一个 `judge` 阶段，可开关（请求体 `judge: boolean`）
+- [x] UI 上标记"分数来源"：heuristic / llm-judge(model) / human
+- [x] 首页 badge 显示当前 judge 状态（模型名 或 Heuristic only）
+- [x] RunPanel 增加 LLM judge 勾选，没 key 时自动禁用
+- [ ] 思考：要不要支持 ensemble judge（多个模型投票）？先保持单 judge
 
 ### Step 4：HTML / Markdown 报告导出
 

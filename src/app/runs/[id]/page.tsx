@@ -34,11 +34,31 @@ export default async function RunPage({ params }: { params: { id: string } }) {
         <Link href="/" className="text-xs text-muted hover:text-fg">
           ← back
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold">{c.title}</h1>
-        <p className="mt-1 text-xs text-muted">
-          {c.dimension} · {run.results.length} models · started{' '}
-          {formatUtcDateTime(run.startedAt)}
-        </p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">{c.title}</h1>
+            <p className="mt-1 text-xs text-muted">
+              {c.dimension} · {run.results.length} models · started{' '}
+              {formatUtcDateTime(run.startedAt)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/runs/${run.id}/export?format=md`}
+              className="rounded-lg border border-border bg-bg px-3 py-1.5 text-xs text-muted hover:text-fg"
+              title="Download a plain Markdown report"
+            >
+              Export .md
+            </a>
+            <a
+              href={`/api/runs/${run.id}/export?format=html`}
+              className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20"
+              title="Download a self-contained HTML report (printable, no network)"
+            >
+              Export .html
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Prompt card */}

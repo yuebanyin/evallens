@@ -7,11 +7,10 @@
 
 ## 现在进行到哪
 
-**Step 3：LLM-as-Judge 打分（主线）** — done ✅
+**Step 4：HTML / Markdown 报告导出（主线）** — done ✅
 
-上一步刚做完 Step 2（自定义 case CRUD + Built-in/Custom 分组）。  
-现在 run 里加了一个可开关的 LLM judge 阶段：有 OpenAI / Anthropic key 时默认开启，按 rubric 给每个维度打分并输出一句 notes；UI 在详情页用 badge 区分 heuristic / llm-judge / human。  
-下一步进入 **Step 4：HTML / Markdown 报告导出**，或者回头处理 Step 2 的可选收尾优化。
+上一步完成了 LLM-as-Judge，现在详情页可以一键导出 Markdown 或自包含 HTML（内联 CSS + 内联 SVG 雷达，不带任何外部资源）。  
+下一步进入 **Step 5：Vercel 部署** 或先回头做 **Step 2/Step 4 的可选收尾优化**。
 
 ---
 
@@ -74,14 +73,16 @@
 - [x] RunPanel 增加 LLM judge 勾选，没 key 时自动禁用
 - [ ] 思考：要不要支持 ensemble judge（多个模型投票）？先保持单 judge
 
-### Step 4：HTML / Markdown 报告导出
+### ✅ Step 4：HTML / Markdown 报告导出
 
 让评测结果能"带走"，发给非技术同事。
 
-- [ ] 详情页加 "Export" 按钮
-- [ ] Markdown：纯文本，方便贴到 Slack / PR
-- [ ] HTML：自包含的单文件，雷达图变内嵌 SVG
-- [ ] 思考：要不要支持 PDF？应该不用，HTML 打印就行
+- [x] 详情页头部加 Export 按钮（.md / .html）
+- [x] Markdown：纯文本（meta / prompt / scores 表 / 逐 model output），方便贴 Slack / PR
+- [x] HTML：自包含单文件，内联 CSS + 服务端渲染 SVG 雷达（不请外部资源）
+- [x] 新增 API `GET /api/runs/<id>/export?format=md|html`，带 Content-Disposition 触发下载
+- [x] 报告里保留 score source 与 judge notes
+- [ ] 思考：PDF 暂不做，HTML 打印即可
 
 ### Step 5：Vercel 部署 + Demo 链接
 

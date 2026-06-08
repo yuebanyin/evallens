@@ -15,6 +15,16 @@
 
 ---
 
+## Try it live
+
+Too lazy to clone? Hit the button below to deploy your own copy to Vercel in a minute, or just open the demo link the maintainer keeps published (update the link here once it's live).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens&env=EVALLENS_DEMO&envDescription=Set+to+1+to+force+mock-only+demo+mode+%28recommended+for+public+demos%29&envLink=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens%23demo-mode)
+
+> Demo mode forces the mock provider, disables the LLM judge, and writes runs/cases to `/tmp` (ephemeral). Visitors can play with the full flow without touching your API quota. Local development is unaffected.
+
+---
+
 ## Why EvalLens?
 
 > *"GPT-5 or Claude? Which one is actually better for **our** product?"*
@@ -133,11 +143,28 @@ A case only contributes to scoring after passing **both** gates. This single des
 - [x] 5-dimension rubric templates
 - [x] Sanity-check gate
 - [x] Side-by-side compare + radar chart
-- [ ] Shareable HTML report export
-- [ ] RAG evaluation module (retrieval + answer quality)
-- [ ] Self-eval mode (LLM-as-judge with human override)
+- [x] Per-case model picker (choose which models to run per case)
+- [x] Custom case CRUD (add / edit / delete your own tasks in the UI)
+- [x] LLM-as-judge scoring with rubric prompts + judge notes
+- [x] One-click Markdown / self-contained HTML report export
+- [x] Demo mode + Vercel-ready deployment (mock-only, no key burn)
+- [ ] Cross-run comparison (same case across time and models)
 - [ ] Dataset importers (SWE-bench Lite, HumanEval)
-- [ ] Plugin SDK
+- [ ] CI (GitHub Actions: typecheck + lint + smoke test)
+
+---
+
+## Demo mode
+
+Set `EVALLENS_DEMO=1` (or just deploy to Vercel — the `VERCEL` env var auto-enables it) to switch on a guarded preview mode:
+
+- `availableProviders()` only returns the built-in mock; OpenAI/Anthropic entries are stripped
+- Even if someone forges a request body specifying `provider=openai`, the runner downgrades it to a same-named mock
+- The LLM-as-Judge falls back to heuristic scoring — no real model is ever called
+- Data writes are redirected to `/tmp/.evallens-demo/` (writable but ephemeral on serverless)
+- The home page shows an orange `Demo mode (mock only · ephemeral)` badge
+
+If you want to run real models on Vercel (on your own dime, for trusted users), explicitly set `EVALLENS_DEMO=0`. Note that serverless filesystems are ephemeral — for long-lived production data, replace the JSON store with external storage.
 
 ---
 

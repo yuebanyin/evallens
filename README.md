@@ -15,6 +15,16 @@
 
 ---
 
+## 在线试用
+
+懒得 clone？点下面这个按钮把 demo 一键部署到自己的 Vercel；或者直接打开作者维护的 demo 链接体验一下（部署完把链接更新到这里）。
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens&env=EVALLENS_DEMO&envDescription=Set+to+1+to+force+mock-only+demo+mode+%28recommended+for+public+demos%29&envLink=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens%23demo-mode)
+
+> Demo 模式下只跑内置的 mock provider、不调真模型，数据写到 `/tmp` 是临时的——既能让访客把整套流程跑一遍，也不会烧你的 API key。本地开发不受影响。
+
+---
+
 ## 这是个什么东西
 
 "GPT-5 还是 Claude，到底哪个更适合我们的产品？"
@@ -109,14 +119,30 @@ case 草稿  ──Build 门──▶  可执行 case  ──Sanity 门──▶
 - [x] 并排对比 + 雷达图
 - [x] 本地 JSON 存储
 - [x] 模型选择 UI（每个 case 可以单独勾要跑哪些模型）
+- [x] 自定义 case 表单（在 UI 里直接添加 / 编辑 / 删除自己的任务）
+- [x] LLM-as-judge：用一个模型按 rubric 给另一个打分，并保留 judge notes
+- [x] 一键导出 Markdown / 自包含 HTML 报告（HTML 自带内联 SVG 雷达图，可离线打开）
+- [x] Demo 模式 + Vercel 部署支持（一键试用，不烧 key）
 
 接下来想做：
 
-- [ ] 自定义 case 表单（在 UI 里直接添加自己的任务）
-- [ ] LLM-as-judge：用一个模型给另一个打分，再加人工 override
-- [ ] 一键导出 HTML / Markdown 报告
 - [ ] 跨 run 的对比（同一个 case 在不同时间、不同模型上的演化）
 - [ ] 接入公开数据集（SWE-bench Lite、HumanEval 等）
+- [ ] CI（GitHub Actions：typecheck + lint + 基本冒烟）
+
+---
+
+## Demo mode
+
+设置 `EVALLENS_DEMO=1`（或直接部署到 Vercel——自动识别 `VERCEL` 环境变量后默认打开）后，会启用以下保护：
+
+- `availableProviders()` 只返回内置 mock，OpenAI / Anthropic 条目被剥掉
+- 即使有人伪造请求体硬指定 `provider=openai`，运行入口也会把它兜底转成同名 mock
+- LLM-as-Judge 自动退化到 heuristic 打分，绝不调用真模型
+- 数据写入路径切到 `/tmp/.evallens-demo/`（Vercel 等 serverless 上可写但临时）
+- 首页会显示 `Demo mode (mock only · ephemeral)` 的橙色 badge
+
+如果想在 Vercel 上跑真模型（自费、给可信用户用），把 `EVALLENS_DEMO=0` 显式传进环境变量即可。但要注意 serverless FS 是临时的，数据不会跨函数实例保留——长期生产请改成外部存储。
 
 ---
 

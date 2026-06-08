@@ -7,10 +7,12 @@
 
 ## 现在进行到哪
 
-**Step 4：HTML / Markdown 报告导出（主线）** — done ✅
+**Step 5：Vercel 部署 + Demo 模式（主线）** — done ✅
 
-上一步完成了 LLM-as-Judge，现在详情页可以一键导出 Markdown 或自包含 HTML（内联 CSS + 内联 SVG 雷达，不带任何外部资源）。  
-下一步进入 **Step 5：Vercel 部署** 或先回头做 **Step 2/Step 4 的可选收尾优化**。
+代码层已经准备好让 EvalLens 跑在 Vercel 上：检测到 `VERCEL` / `EVALLENS_DEMO=1` 会自动切换到 demo 模式（只跑 mock provider、禁用 LLM judge、把数据写到 `/tmp`，并在 UI 顶部显示橙色 badge）。README 顶部加了 "Try it live" 段落与一键 Deploy 按钮。
+真正的线上部署需要在你自己的 Vercel 账户里点一下按钮完成 —— 仓库这边已经具备所有前置条件。
+
+下一步进入 **Step 6：GitHub Actions CI**，或先回头清 Step 2/Step 3 的可选 polish。
 
 ---
 
@@ -84,14 +86,19 @@
 - [x] 报告里保留 score source 与 judge notes
 - [ ] 思考：PDF 暂不做，HTML 打印即可
 
-### Step 5：Vercel 部署 + Demo 链接
+### ✅ Step 5：Vercel 部署 + Demo 链接
 
 让访客 3 秒钟体验产品。
 
-- [ ] 部署到 Vercel
-- [ ] README 顶部加 "Try it live" 按钮
-- [ ] 注意：线上版必须强制 mock 模式（不能把生产 API key 暴露）
-- [ ] 思考：是否提供"BYOK"（用户填自己的 key，存在浏览器 localStorage）？可能 Step 5.5
+- [x] 新增 `lib/env.ts`：`isDemoMode()` 识别 `EVALLENS_DEMO` / `VERCEL`，`storageRoot()` 在 serverless 上落到 `/tmp/.evallens-demo`
+- [x] `providers/index.ts`：demo 下 `availableProviders()` 只返回 mock；`runProviders()` 把任何 real provider 兜底改写成同名 mock，防止伪造请求绕过
+- [x] `store.ts`：root 切换到 `storageRoot()`，`listUserCases` 在目录不存在时安全降级
+- [x] `judge.ts`：demo 下 `defaultJudge()` 直接 return null
+- [x] 首页加 `Demo mode (mock only · ephemeral)` 橙色 badge
+- [x] README / README.en.md：顶部 "Try it live" 段落 + 一键 Deploy 按钮 + `## Demo mode` 段落
+- [x] `.env.example`：补充 `EVALLENS_DEMO` 与 `JUDGE_*` 注释
+- [ ] 真正点一下 Vercel Deploy（需要你的 Vercel 账户登录，仓库这边已 ready）
+- [ ] 部署完把 demo URL 回写到 README 顶部
 
 ### Step 6：GitHub Actions CI
 

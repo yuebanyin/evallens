@@ -6,6 +6,7 @@ import { CreateCaseDialog } from '@/components/CreateCaseDialog';
 import { CustomCaseActions } from '@/components/CustomCaseActions';
 import { formatUtcDateTime } from '@/lib/format';
 import { defaultJudge } from '@/lib/judge';
+import { isDemoMode } from '@/lib/env';
 import type { Case } from '@/lib/types';
 import type { ProviderOption } from '@/components/RunPanel';
 
@@ -18,6 +19,7 @@ export default async function HomePage() {
   const hasRealKeys = providers.some((p) => p.id !== 'mock');
   const judge = defaultJudge();
   const judgeAvailable = judge !== null;
+  const demo = isDemoMode();
 
   // Default selection: prefer real providers when keys are configured,
   // otherwise default to a single mock so the demo "just works".
@@ -46,7 +48,13 @@ export default async function HomePage() {
           ) : (
             <Badge>Heuristic scoring</Badge>
           )}
-          {!hasRealKeys && <Badge tone="warn">Mock mode (no API keys)</Badge>}
+          {demo ? (
+            <Badge tone="warn" title="Demo mode forces mock providers; runs/cases are ephemeral">
+              Demo mode (mock only · ephemeral)
+            </Badge>
+          ) : (
+            !hasRealKeys && <Badge tone="warn">Mock mode (no API keys)</Badge>
+          )}
         </div>
       </section>
 
@@ -137,9 +145,11 @@ function SectionTitle({
 function Badge({
   children,
   tone = 'default',
+  title,
 }: {
   children: React.ReactNode;
   tone?: 'default' | 'ok' | 'warn' | 'accent';
+  title?: string;
 }) {
   const palette = {
     default: 'bg-bg text-muted border-border',
@@ -148,7 +158,9 @@ function Badge({
     accent: 'bg-accent/10 text-accent border-accent/30',
   }[tone];
   return (
-    <span className={`rounded-full border px-2.5 py-1 ${palette}`}>{children}</span>
+    <span title={title} className={`rounded-full border px-2.5 py-1 ${palette}`}>
+      {children}
+    </span>
   );
 }
 

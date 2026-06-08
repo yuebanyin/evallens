@@ -3,6 +3,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import type { Case, ModelResult, ProviderId } from './types';
 import { RUBRIC_DIMENSIONS } from './rubric';
+import { isDemoMode } from './env';
 
 /**
  * LLM-as-Judge：用一个模型按 rubric 给另一个模型的输出打分。
@@ -24,6 +25,9 @@ export interface JudgeSpec {
  * 默认偏好 openai（社区里大多数 G-Eval / MT-Bench 基线都是 GPT-4 系列）。
  */
 export function defaultJudge(): JudgeSpec | null {
+  // Demo 模式不烧 token，直接退化到 heuristic。
+  if (isDemoMode()) return null;
+
   const envProvider = process.env.JUDGE_PROVIDER as ProviderId | undefined;
   const envModel = process.env.JUDGE_MODEL;
 

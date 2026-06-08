@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, type Dirent } from 'node:fs';
 import type { Case, Run } from './types';
 import seedCases from '@/data/seed-cases.json';
+import { storageRoot } from './env';
 
 /**
  * 本地持久化：每个 run 写成一个 JSON 文件，放在项目根目录的
@@ -10,16 +11,19 @@ import seedCases from '@/data/seed-cases.json';
  *
  * 选 JSON 而不是数据库，是因为评测工具最关键的是"我的数据我自己掌握"——
  * 用户可以直接 grep、diff、丢进 git，不用为一个本地小工具装 Postgres。
+ *
+ * Demo / serverless 环境（Vercel 等）下，root 会切到 `/tmp/.evallens-demo`，
+ * 写得进去但每次冷启可能丢，这是 demo 可接受的取舍。
  */
 
-const ROOT = path.join(process.cwd(), '.evallens');
+const ROOT = storageRoot();
 const RUNS_DIR = path.join(ROOT, 'runs');
 const CASES_DIR = path.join(ROOT, 'cases');
 
 function ensureDirs() {
-  if (!existsSync(ROOT)) mkdirSync(ROOT);
-  if (!existsSync(RUNS_DIR)) mkdirSync(RUNS_DIR);
-  if (!existsSync(CASES_DIR)) mkdirSync(CASES_DIR);
+  if (!existsSync(ROOT)) mkdirSync(ROOT, { recursive: true });
+  if (!existsSync(RUNS_DIR)) mkdirSync(RUNS_DIR, { recursive: true });
+  if (!existsSync(CASES_DIR)) mkdirSync(CASES_DIR, { recursive: true });
 }
 
 export function listCases(): Case[] {
@@ -99,7 +103,12 @@ export function newCaseId(): string {
 
 export function listUserCases(): Case[] {
   const cases: Case[] = [];
-  const files = readdirSync(CASES_DIR, { withFileTypes: true });
+  let files: Dirent[];
+  try {
+    files = readdirSync(CASES_DIR, { withFileTypes: true });
+  } catch {
+    return cases;
+  }
   for (const entry of files) {
     if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
     try {

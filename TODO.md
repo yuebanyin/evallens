@@ -11,7 +11,9 @@
 
 EvalLens 已经部署到 Vercel：<https://evallens.vercel.app/>。检测到 `VERCEL` / `EVALLENS_DEMO=1` 会自动切换到 demo 模式（只跑 mock provider、禁用 LLM judge、把数据写到 `/tmp`，并在 UI 顶部显示橙色 badge）。README 顶部加了真实 demo 链接与一键 Deploy 按钮。
 
-下一步进入 **Step 6：GitHub Actions CI**，或先回头清 Step 2/Step 3 的可选 polish。
+下一步继续写功能。Step 6（GitHub Actions CI）。
+
+当前适合对外展示的状态：线上 demo 可访问、核心链路可跑通、README 有真实入口；后续再补 CI 和 polish。
 
 ---
 
@@ -99,13 +101,15 @@ EvalLens 已经部署到 Vercel：<https://evallens.vercel.app/>。检测到 `VE
 - [x] 真正点一下 Vercel Deploy：<https://evallens.vercel.app/>
 - [x] 部署完把 demo URL 回写到 README 顶部
 
-### Step 6：GitHub Actions CI
+### ⏸ Step 6：GitHub Actions CI（Later）
 
-社区门面，让别人提 PR 有反馈。
+社区门面，让别人提 PR 有反馈。优先级先后移，等项目进入更稳定维护阶段再补。
 
 - [ ] `.github/workflows/ci.yml`：跑 `npm run typecheck` + `npm run lint`
 - [ ] Push / PR 都触发
 - [ ] README 加 CI 徽章
+
+先不做的原因：目前产品展示链路已经闭环；CI 属于工程卫生项，不阻塞 demo 分享、作品集展示或下一批更高优先级功能。
 
 ---
 

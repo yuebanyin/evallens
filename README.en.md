@@ -17,7 +17,9 @@
 
 ## Try it live
 
-Too lazy to clone? Hit the button below to deploy your own copy to Vercel in a minute, or just open the demo link the maintainer keeps published (update the link here once it's live).
+[Open the live demo](https://evallens.vercel.app/) to try the full flow without an API key. The public demo runs in mock-only mode by default.
+
+You can also deploy your own copy to Vercel in a minute:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens&env=EVALLENS_DEMO&envDescription=Set+to+1+to+force+mock-only+demo+mode+%28recommended+for+public+demos%29&envLink=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens%23demo-mode)
 

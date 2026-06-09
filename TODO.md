@@ -9,8 +9,7 @@
 
 **Step 5：Vercel 部署 + Demo 模式（主线）** — done ✅
 
-代码层已经准备好让 EvalLens 跑在 Vercel 上：检测到 `VERCEL` / `EVALLENS_DEMO=1` 会自动切换到 demo 模式（只跑 mock provider、禁用 LLM judge、把数据写到 `/tmp`，并在 UI 顶部显示橙色 badge）。README 顶部加了 "Try it live" 段落与一键 Deploy 按钮。
-真正的线上部署需要在你自己的 Vercel 账户里点一下按钮完成 —— 仓库这边已经具备所有前置条件。
+EvalLens 已经部署到 Vercel：<https://evallens.vercel.app/>。检测到 `VERCEL` / `EVALLENS_DEMO=1` 会自动切换到 demo 模式（只跑 mock provider、禁用 LLM judge、把数据写到 `/tmp`，并在 UI 顶部显示橙色 badge）。README 顶部加了真实 demo 链接与一键 Deploy 按钮。
 
 下一步进入 **Step 6：GitHub Actions CI**，或先回头清 Step 2/Step 3 的可选 polish。
 
@@ -97,8 +96,8 @@
 - [x] 首页加 `Demo mode (mock only · ephemeral)` 橙色 badge
 - [x] README / README.en.md：顶部 "Try it live" 段落 + 一键 Deploy 按钮 + `## Demo mode` 段落
 - [x] `.env.example`：补充 `EVALLENS_DEMO` 与 `JUDGE_*` 注释
-- [ ] 真正点一下 Vercel Deploy（需要你的 Vercel 账户登录，仓库这边已 ready）
-- [ ] 部署完把 demo URL 回写到 README 顶部
+- [x] 真正点一下 Vercel Deploy：<https://evallens.vercel.app/>
+- [x] 部署完把 demo URL 回写到 README 顶部
 
 ### Step 6：GitHub Actions CI
 

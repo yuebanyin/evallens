@@ -17,7 +17,9 @@
 
 ## 在线试用
 
-懒得 clone？点下面这个按钮把 demo 一键部署到自己的 Vercel；或者直接打开作者维护的 demo 链接体验一下（部署完把链接更新到这里）。
+[打开在线 Demo](https://evallens.vercel.app/) 直接体验完整流程；不需要 API key，线上版默认只跑内置 mock provider。
+
+也可以点下面这个按钮，把 EvalLens 一键部署到自己的 Vercel：
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens&env=EVALLENS_DEMO&envDescription=Set+to+1+to+force+mock-only+demo+mode+%28recommended+for+public+demos%29&envLink=https%3A%2F%2Fgithub.com%2Fyuebanyin%2Fevallens%23demo-mode)
 

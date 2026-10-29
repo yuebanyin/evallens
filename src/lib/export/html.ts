@@ -9,26 +9,32 @@ import { radarSvg, type RadarSeries } from './radar-svg';
 export function toHtml(run: Run): string {
   const c = run.caseSnapshot;
   const dims = RUBRIC_DIMENSIONS[c.dimension];
+  const scoredResults = run.results.filter(hasScores);
 
-  const series: RadarSeries[] = run.results.map((r) => ({
+  const series: RadarSeries[] = scoredResults.map((r) => ({
     name: `${r.provider}/${r.model}`,
     scores: r.scores ?? {},
   }));
   const svg = radarSvg({ dims, series, size: 520 });
 
   const judgeModel = pickJudgeModel(run);
-  const scoreSourceLabel = judgeModel ? `llm-judge (${judgeModel})` : 'heuristic';
+  const scoreSourceLabel = !scoredResults.length
+    ? 'none'
+    : judgeModel
+      ? `llm-judge (${judgeModel})`
+      : 'heuristic';
 
-  const headerRow = ['Model', ...dims.map((d) => d.label), 'Sanity']
+  const headerRow = ['Model', ...dims.map((d) => d.label), 'Sanity / scoring']
     .map((h) => `<th>${esc(h)}</th>`)
     .join('');
 
   const tableRows = run.results
     .map((r) => {
+      const hasScore = hasScores(r);
       const cells = [
         `<td><code>${esc(r.provider)}/${esc(r.model)}</code></td>`,
-        ...dims.map((d) => `<td>${fmtScore(r.scores?.[d.key])}</td>`),
-        `<td>${r.sanity.passed ? '✓' : '✗'}</td>`,
+        ...dims.map((d) => `<td>${fmtScore(r.sanity.passed ? r.scores?.[d.key] : undefined)}</td>`),
+        `<td>${!r.sanity.passed ? '✗ excluded' : hasScore ? '✓ scored' : '— no score'}</td>`,
       ].join('');
       return `<tr>${cells}</tr>`;
     })
@@ -40,7 +46,9 @@ export function toHtml(run: Run): string {
         `latency <code>${r.latencyMs}ms</code>`,
         `in <code>${r.inputTokens ?? '—'}</code>`,
         `out <code>${r.outputTokens ?? '—'}</code>`,
-        `source <code>${esc(r.scoreSource ?? 'heuristic')}</code>`,
+        `source <code>${esc(
+          hasScores(r) ? r.scoreSource ?? 'heuristic' : 'not scored',
+        )}</code>`,
       ].join(' · ');
 
       const errBlock = r.error
@@ -54,7 +62,7 @@ export function toHtml(run: Run): string {
               .join('')}</ul></div>`
           : '';
 
-      const judgeBlock = r.judgeNotes
+      const judgeBlock = r.sanity.passed && r.judgeNotes
         ? `<details class="judge"><summary>Judge notes (${esc(r.judgeModel || 'llm')})</summary><p>${esc(
             r.judgeNotes,
           )}</p></details>`
@@ -160,7 +168,11 @@ export function toHtml(run: Run): string {
     </div>
 
     <h2>Radar</h2>
-    <div class="panel radar-wrap">${svg}</div>
+    <div class="panel radar-wrap">${
+      scoredResults.length > 0
+        ? svg
+        : '<p>No results passed Sanity checks, so there are no scores to chart.</p>'
+    }</div>
 
     <h2>Outputs</h2>
     <div class="grid">${resultCards}</div>
@@ -187,7 +199,11 @@ function fmtScore(v: number | undefined): string {
 
 function pickJudgeModel(run: Run): string | null {
   for (const r of run.results) {
-    if (r.scoreSource === 'llm-judge' && r.judgeModel) return r.judgeModel;
+    if (hasScores(r) && r.scoreSource === 'llm-judge' && r.judgeModel) return r.judgeModel;
   }
   return null;
+}
+
+function hasScores(result: Run['results'][number]): boolean {
+  return result.sanity.passed && Object.keys(result.scores ?? {}).length > 0;
 }

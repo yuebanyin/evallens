@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { ProviderId } from '@/lib/types';
+import type { ProviderId, Run } from '@/lib/types';
 
 export interface ProviderOption {
   id: ProviderId;
@@ -59,7 +59,13 @@ export function RunPanel({ caseId, providers, defaultSelected, judgeAvailable }:
         alert(`Run failed: ${t}`);
         return;
       }
-      const data = (await res.json()) as { runId: string };
+      const data = (await res.json()) as { runId: string; run: Run };
+      try {
+        sessionStorage.setItem(`evallens:run:${data.runId}`, JSON.stringify(data.run));
+      } catch {
+        alert('Could not save this run in the current browser session. Check browser storage settings and try again.');
+        return;
+      }
       router.push(`/runs/${data.runId}`);
     } finally {
       setLoading(false);

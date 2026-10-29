@@ -20,7 +20,7 @@ export async function runAnthropic(c: Case, model: string): Promise<ModelResult>
       inputTokens: usage?.promptTokens,
       outputTokens: usage?.completionTokens,
     });
-    result.scores = heuristicScore(c, text);
+    if (result.sanity.passed) result.scores = heuristicScore(c, text);
     return result;
   } catch (err) {
     return annotateSanity(c, {

@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
   // Default: provider 写入的是 heuristic 分，这里把来源补上。
   for (const r of results) {
-    if (!r.scoreSource) r.scoreSource = 'heuristic';
+    if (r.sanity.passed && !r.scoreSource) r.scoreSource = 'heuristic';
   }
 
   // 可选 judge 阶段。请求里没写 judge 默认就跑（只要环境里有 key 配 judge）。
@@ -71,5 +71,5 @@ export async function POST(req: Request) {
   };
   await saveRun(run);
 
-  return NextResponse.json({ runId: run.id });
+  return NextResponse.json({ runId: run.id, run });
 }

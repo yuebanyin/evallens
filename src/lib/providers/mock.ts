@@ -19,7 +19,7 @@ export async function runMock(c: Case, model: string): Promise<ModelResult> {
     inputTokens: c.prompt.length / 4,
     outputTokens: text.length / 4,
   });
-  result.scores = heuristicScore(c, text);
+  if (result.sanity.passed) result.scores = heuristicScore(c, text);
   return result;
 }
 

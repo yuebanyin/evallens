@@ -72,6 +72,7 @@ export async function judgeResult(
 ): Promise<JudgeOutcome | null> {
   if (!r.output?.trim()) return null;
   if (r.error) return null;
+  if (!r.sanity.passed) return null;
 
   const dims = RUBRIC_DIMENSIONS[c.dimension];
   const prompt = buildJudgePrompt(c, r.output, dims);

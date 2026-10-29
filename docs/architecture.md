@@ -33,11 +33,11 @@ Case Draft ──Build Gate──▶ Executable Case ──Sanity Gate──▶ 
 
 | Gate | Purpose | Implementation |
 |---|---|---|
-| **Build** | Is the *case itself* well-formed? | `checkCase()` validates schema, prompt size, required fields. |
-| **Sanity** | Is the *output* structurally usable before scoring? | `checkOutput()` validates JSON-parsability, constraint tokens, length. |
+| **Build** | Is the *case itself* usable? | `checkCase()` rejects empty or oversized prompts and JSON cases without an expected reference. |
+| **Sanity** | Is the output structurally usable for scoring? | `checkOutput()` checks non-empty output, JSON parsing, and declared length / token constraints. |
 
 A case that fails Build is rejected before any model is called.
-A result that fails Sanity is shown but excluded from aggregate scoring.
+A result that fails Sanity remains visible for inspection, but receives no heuristic score, is skipped by LLM-as-Judge, and is excluded from the radar chart and exported score summaries.
 
 This single design prevents the most common failure mode of homegrown evals:
 **giving credit (or blame) for output that was never structurally valid**.
@@ -62,9 +62,15 @@ The **mock** provider exists for two reasons:
 
 Runs are written as plain JSON under `.evallens/runs/<id>.json`. Rationale:
 
-- **Local-first** — nothing leaves the machine.
+- **Local-first** — case and run records are stored locally during local development. If OpenAI or Anthropic is selected, the prompt is sent to that provider for inference; the built-in mock makes no external model call.
 - **Trivial to inspect / version** — `cat`, `git diff`, share via gist.
 - **Zero migration cost** — JSON is forward-compatible.
+
+The public demo uses mock-only mode and writes to ephemeral `/tmp` storage.
+Because serverless functions may not share that temporary filesystem, the run API
+also returns the completed run to the browser. The result page uses the current
+tab's session storage as a fallback; demo result URLs are therefore session-scoped
+and are not durable share links.
 
 If/when a team mode is added, the same JSON shape will move into Postgres
 without changing the type system.
@@ -78,9 +84,10 @@ radar chart immediately. It blends:
 - Expected-output token overlap (proxy for correctness)
 - Constraint compliance (mustContain / mustNotContain)
 
-This is *not* a replacement for LLM-as-judge — it is a fast first pass that
-makes the product feel useful before any keys are added. The roadmap includes
-a proper judge pipeline with human-in-the-loop override.
+This is a lightweight first pass, not a reliable quality measure. When configured,
+the optional LLM-as-Judge can replace heuristic scores for Sanity-passed outputs.
+Judge results should still be reviewed by a person; manual score overrides are not
+currently implemented.
 
 ## 7. Why Next.js fullstack (and not Python + React)
 

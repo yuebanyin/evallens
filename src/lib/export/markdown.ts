@@ -22,7 +22,8 @@ export function toMarkdown(run: Run): string {
   meta.push(`- **Started**: ${run.startedAt}`);
   if (run.finishedAt) meta.push(`- **Finished**: ${run.finishedAt}`);
   const judgeModel = pickJudgeModel(run);
-  if (judgeModel) meta.push(`- **Score source**: \`llm-judge (${judgeModel})\``);
+  if (!run.results.some(hasScores)) meta.push('- **Score source**: `none`');
+  else if (judgeModel) meta.push(`- **Score source**: \`llm-judge (${judgeModel})\``);
   else meta.push('- **Score source**: `heuristic`');
   lines.push(meta.join('\n'));
   lines.push('');
@@ -38,14 +39,15 @@ export function toMarkdown(run: Run): string {
   // Summary scores table
   lines.push('## Scores');
   lines.push('');
-  const head = ['Model', ...dims.map((d) => d.label), 'Sanity'];
+  const head = ['Model', ...dims.map((d) => d.label), 'Sanity / scoring'];
   lines.push(`| ${head.join(' | ')} |`);
   lines.push(`| ${head.map(() => '---').join(' | ')} |`);
   for (const r of run.results) {
+    const hasScore = hasScores(r);
     const row = [
       `\`${r.provider}/${r.model}\``,
-      ...dims.map((d) => fmtScore(r.scores?.[d.key])),
-      r.sanity.passed ? '✓' : '✗',
+      ...dims.map((d) => fmtScore(r.sanity.passed ? r.scores?.[d.key] : undefined)),
+      !r.sanity.passed ? '✗ excluded' : hasScore ? '✓ scored' : '— no score',
     ];
     lines.push(`| ${row.join(' | ')} |`);
   }
@@ -55,13 +57,14 @@ export function toMarkdown(run: Run): string {
   lines.push('## Outputs');
   lines.push('');
   for (const r of run.results) {
+    const hasScore = hasScores(r);
     lines.push(`### ${r.provider}/${r.model}`);
     lines.push('');
     const stats: string[] = [
       `latency \`${r.latencyMs}ms\``,
       `in \`${r.inputTokens ?? '—'}\``,
       `out \`${r.outputTokens ?? '—'}\``,
-      `source \`${r.scoreSource ?? 'heuristic'}\``,
+      `source \`${hasScore ? r.scoreSource ?? 'heuristic' : 'not scored'}\``,
     ];
     lines.push(stats.join(' · '));
     lines.push('');
@@ -81,7 +84,7 @@ export function toMarkdown(run: Run): string {
       lines.push('');
     }
 
-    if (r.judgeNotes) {
+    if (r.sanity.passed && r.judgeNotes) {
       lines.push(`**Judge notes** (\`${r.judgeModel || 'llm'}\`):`);
       lines.push('');
       lines.push('> ' + r.judgeNotes.replace(/\n/g, '\n> '));
@@ -112,7 +115,11 @@ function codeFenceLang(schema: 'text' | 'json' | 'code'): string {
 
 function pickJudgeModel(run: Run): string | null {
   for (const r of run.results) {
-    if (r.scoreSource === 'llm-judge' && r.judgeModel) return r.judgeModel;
+    if (hasScores(r) && r.scoreSource === 'llm-judge' && r.judgeModel) return r.judgeModel;
   }
   return null;
+}
+
+function hasScores(result: Run['results'][number]): boolean {
+  return result.sanity.passed && Object.keys(result.scores ?? {}).length > 0;
 }

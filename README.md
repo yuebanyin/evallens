@@ -38,7 +38,7 @@
 - 跑在本地，不用部署、不用付费、不用注册
 - 没有 API key 也能完整体验一遍流程
 - 同一个任务发给多个模型，并排看输出 + 一张雷达图
-- 评测之前先校验，避免拿一份本身就有问题的输出去打分
+- 运行前校验 case；Sanity 未通过的输出仍可查看，但不参与评分
 
 这就是 EvalLens。
 
@@ -66,7 +66,7 @@ npm run dev
 ## 它现在能干什么
 
 - **多 Provider 并发**：OpenAI、Anthropic，以及一个内置的 mock provider，方便没 key 的人也能完整体验
-- **Sanity Check**：评分前先校验 case 写得对不对、模型输出合不合规（关键字、格式、长度），把噪声挡在前面
+- **Sanity Check**：Build 阶段检查 case；输出阶段检查 JSON 格式、长度和关键字约束。未通过的输出保留查看并显示失败原因，但不参与评分
 - **五维 Rubric 模板**：按任务类型预置了 UI / Bug / Feature / 文档 / 安全 五套打分维度
 - **并排对比 + 雷达图**：一屏看完多个模型的输出、延迟、token 数，以及五个维度的得分
 - **本地 JSON 存储**：每次运行落到 `.evallens/runs/<id>.json`，可以直接 grep、diff、丢进 git，需要的时候也方便迁移走
@@ -107,7 +107,9 @@ case 草稿  ──Build 门──▶  可执行 case  ──Sanity 门──▶
             (能跑起来)                 (输出合理、不空、不违反约束)
 ```
 
-只有同时通过 Build 和 Sanity 的输出才会进打分环节。这条规则单独拎出来听着像废话，但它能消掉自研评测最常见的失败模式：拿一份本身就有问题的回答去打分，最后得到一份看上去煞有介事、实际全是噪声的报告。
+Build 阶段检查 case 是否可用：当前会拒绝空 Prompt、超过长度上限的 Prompt，以及缺少参考说明的 JSON case。未通过 Build 的 case 不会触发模型调用。
+
+模型输出会经过 Sanity 检查，包括空输出、JSON 可解析性以及长度和关键字约束。未通过的输出仍会显示在结果页和导出报告中，便于排查，但不会获得 heuristic 分数、进入 LLM-as-Judge 或出现在评分雷达图中。
 
 ---
 
@@ -142,6 +144,7 @@ case 草稿  ──Build 门──▶  可执行 case  ──Sanity 门──▶
 - 即使有人伪造请求体硬指定 `provider=openai`，运行入口也会把它兜底转成同名 mock
 - LLM-as-Judge 自动退化到 heuristic 打分，绝不调用真模型
 - 数据写入路径切到 `/tmp/.evallens-demo/`（Vercel 等 serverless 上可写但临时）
+- 运行结果会同时交给当前浏览器标签页暂存，避免 serverless 函数间临时文件不共享导致结果页 404；Demo 结果仅在发起运行的标签页会话内可查看，不是可跨设备分享的永久链接
 - 首页会显示 `Demo mode (mock only · ephemeral)` 的橙色 badge
 
 如果想在 Vercel 上跑真模型（自费、给可信用户用），把 `EVALLENS_DEMO=0` 显式传进环境变量即可。但要注意 serverless FS 是临时的，数据不会跨函数实例保留——长期生产请改成外部存储。

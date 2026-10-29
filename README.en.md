@@ -33,7 +33,7 @@ You can also deploy your own copy to Vercel in a minute:
 
 Every PM, researcher, and engineer has asked this. The honest answer today is **"it depends on your task"** — but the tools to find that out are either too engineer-heavy (OpenAI Evals, Promptfoo), too expensive (LangSmith), or too vendor-locked (each lab's own playground).
 
-**EvalLens** brings the rigor of an internal model-evaluation pipeline — the kind I helped build at Microsoft's CoreAI Post-Training team — to anyone, running entirely on your laptop.
+**EvalLens** brings a practical model-evaluation workflow to anyone who wants to compare models on their own tasks, either locally or through the public demo.
 
 ```
             ┌──────────────────────────────────────────────────┐
@@ -62,9 +62,9 @@ Every PM, researcher, and engineer has asked this. The honest answer today is **
 
 ## ✨ Highlights
 
-- **🪶 Local-first.** No SaaS lock-in. Your prompts and data never leave your machine.
+- **🪶 Local-first.** In local development, cases and run records are stored as JSON under `.evallens/`. When you select OpenAI or Anthropic, your prompt is sent to that provider for inference. The built-in mock makes no external model calls; the public demo uses mock-only mode and ephemeral storage.
 - **🔌 Multi-provider out of the box.** OpenAI, Anthropic, and a built-in **mock provider** so you can demo *without any API key*.
-- **🧪 Sanity Check by default.** Every case is validated for *test-itself correctness* before scoring — borrowed from how AI labs guard their benchmarks against bad cases.
+- **🧪 Sanity Check by default.** Cases are checked before model calls; outputs that fail Sanity remain visible for inspection but are excluded from scoring and the radar chart.
 - **📐 5-Dimension Rubric templates.** UI · Bug · Feature · Documentation · Security — preset and customizable.
 - **📊 Side-by-side compare + radar.** Token diff, latency, cost, and a 5-axis radar chart in one screen.
 - **🧠 Self-eval mode.** Let one model judge another, with human-in-the-loop override.
@@ -76,19 +76,20 @@ Every PM, researcher, and engineer has asked this. The honest answer today is **
 
 ```bash
 # 1. Install
-git clone https://github.com/<you>/evallens.git
+git clone https://github.com/yuebanyin/evallens.git
 cd evallens
 npm install
 
-# 2. (Optional) add your keys — EvalLens runs in mock mode without them
+# 2. No API key is needed for mock mode
 cp .env.example .env.local
+# To use real models, add OPENAI_API_KEY and/or ANTHROPIC_API_KEY in .env.local
 
 # 3. Run
 npm run dev
 # → http://localhost:3000
 ```
 
-You'll see 5 seed cases pre-loaded. Pick one, choose models, hit **Run** — done.
+You'll see 5 seed cases pre-loaded. Pick one, choose models, and hit **Run**. Without API keys, the mock provider runs locally; if you configure and select OpenAI or Anthropic, the prompt is sent to that provider.
 
 ---
 
@@ -135,7 +136,7 @@ EvalLens enforces a methodology I learned shipping benchmarks at scale:
                                                               📊 Score & Compare
 ```
 
-A case only contributes to scoring after passing **both** gates. This single design choice eliminates the most common failure mode of homegrown evals: scoring against broken tests.
+Cases that fail Build are rejected before model calls. Outputs that fail Sanity remain visible with their validation reasons, but are excluded from heuristic scoring, LLM-as-Judge, and the radar chart.
 
 ---
 
@@ -164,6 +165,7 @@ Set `EVALLENS_DEMO=1` (or just deploy to Vercel — the `VERCEL` env var auto-en
 - Even if someone forges a request body specifying `provider=openai`, the runner downgrades it to a same-named mock
 - The LLM-as-Judge falls back to heuristic scoring — no real model is ever called
 - Data writes are redirected to `/tmp/.evallens-demo/` (writable but ephemeral on serverless)
+- The run response is also kept in the current browser tab's session storage so the result page works even when serverless functions do not share temporary files. Demo result URLs are session-scoped, not permanent or shareable across devices.
 - The home page shows an orange `Demo mode (mock only · ephemeral)` badge
 
 If you want to run real models on Vercel (on your own dime, for trusted users), explicitly set `EVALLENS_DEMO=0`. Note that serverless filesystems are ephemeral — for long-lived production data, replace the JSON store with external storage.
